@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>أبجد كود | نظام الإدارة</title>
+<style>
+:root{--navy:#0F2342;--teal:#19A7A8;--gold:#F5A800;--bg:#E6F5F7;--red:#D64545;--green:#2E9E5B;--line:#cfe6ea}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--navy);font-size:16px}
+header{background:var(--navy);color:#fff;padding:12px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+header h1{margin:0;font-size:20px}
+header h1 span{color:var(--teal)}
+.sel{display:flex;gap:8px;flex-wrap:wrap}
+.pill{border:2px solid var(--teal);background:transparent;color:#fff;padding:8px 14px;border-radius:20px;cursor:pointer;font:inherit;font-size:14px}
+.pill.on{background:var(--teal)}
+nav{display:flex;overflow-x:auto;background:#fff;border-bottom:3px solid var(--line)}
+nav button{flex:1;min-width:90px;padding:12px 8px;border:0;background:none;font:inherit;font-weight:700;color:var(--navy);cursor:pointer;border-bottom:4px solid transparent;margin-bottom:-3px}
+nav button.on{border-bottom-color:var(--gold);color:var(--teal)}
+main{max-width:760px;margin:0 auto;padding:14px}
+.card{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;border:1px solid var(--line)}
+.card h3{margin:0 0 10px;font-size:17px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.stat{background:var(--bg);border-radius:10px;padding:10px;text-align:center}
+.stat b{display:block;font-size:22px;color:var(--teal)}
+.stat small{font-size:12px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.nm{font-weight:600;flex:1}
+.nm small{display:block;font-weight:400;opacity:.7}
+input,button.act{font:inherit}
+input[type=text],input[type=tel],input[type=number],input[type=date]{padding:9px;border:2px solid var(--line);border-radius:8px;width:100%;color:var(--navy);background:#fff}
+.add{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.add input{flex:1;min-width:130px}
+.btn{background:var(--teal);color:#fff;border:0;padding:9px 16px;border-radius:8px;cursor:pointer;font:inherit;font-weight:700}
+.btn.gold{background:var(--gold);color:var(--navy)}
+.btn.red{background:var(--red)}
+.btn.ghost{background:#fff;color:var(--navy);border:2px solid var(--line)}
+.tg{display:flex;gap:6px}
+.tg button{border:2px solid var(--line);background:#fff;border-radius:8px;padding:7px 12px;cursor:pointer;font:inherit;font-weight:700;color:var(--navy)}
+.tg button.p.on{background:var(--green);border-color:var(--green);color:#fff}
+.tg button.a.on{background:var(--red);border-color:var(--red);color:#fff}
+.paid{background:var(--green);color:#fff;border:0}
+.unpaid{background:#fff;border:2px solid var(--red);color:var(--red)}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;background:var(--teal)}
+.empty{text-align:center;opacity:.7;padding:16px}
+details{border:1px solid var(--line);border-radius:10px;margin-bottom:8px;padding:0 10px}
+summary{padding:10px 0;font-weight:700;cursor:pointer}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.chk{width:24px;height:24px;accent-color:var(--teal)}
+.warn{color:var(--red);font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <h1>أبجد <span>كود</span> | Abjad Code <small style="font-size:11px;opacity:.7">v3</small></h1>
+  <div class="sel">
+    <button class="pill" data-g="1">أولى ثانوي</button>
+    <button class="pill" data-g="2">تانية ثانوي</button>
+    <button class="pill" data-g="3">فرونت إند</button>
+    <button class="pill" data-m="11">نوفمبر 11</button>
+    <button class="pill" data-m="12">ديسمبر 12</button>
+  </div>
+</header>
+<nav>
+  <button data-t="dash">الداشبورد</button>
+  <button data-t="stu">الطلاب</button>
+  <button data-t="att">الحضور</button>
+  <button data-t="pay">الدفع</button>
+  <button data-t="task">التاسكات</button>
+</nav>
+<div id="st" style="text-align:center;font-size:13px;padding:5px;background:#fff3d6">بيتم الاتصال بالمزامنة...</div>
+<main id="app"></main>
+
+<script>
+(function(){ var e = document.getElementById('st'); if (e) e.textContent = 'الصفحة شغالة — بيتم الاتصال بالمزامنة...'; })();
+window.addEventListener('error', function(ev){ var e = document.getElementById('st'); if (e) { e.textContent = 'خطأ: ' + ev.message; e.style.background = '#fde8e8'; } });
+const KEY = 'abjad_code_v1';
+const YEAR = 2026;
+const GN = {'1':'أولى ثانوي','2':'تانية ثانوي','3':'كورس فرونت إند'};
+const MODE = {'1':'s','2':'s','3':'m'}; // s = دفع بالحصة، m = دفع بالشهر
+const MN = {'11':'نوفمبر','12':'ديسمبر'};
+let db = {students:[], att:{}, sp:{}, mp:{}, tasks:[], done:{}, price:{'1':0,'2':0,'3':0}};
+let S = {g:'1', m:'11', t:'dash', date:YEAR+'-11-01', arm:null};
+
+const PARTS = ['students','att','sp','mp','tasks','done','price'];
+let DB = null, chain = Promise.resolve();
+const dirty = new Set();
+try { const x = localStorage.getItem(KEY); if (x) db = Object.assign(db, JSON.parse(x)); } catch(e) {}
+function setSt(t, bad){ const e = document.getElementById('st'); if (e) { e.textContent = t; e.style.background = bad ? '#fde8e8' : '#e3f6ea'; } }
+function sure(key){
+  if (S.arm === key) { S.arm = null; return true; }
+  S.arm = key; render();
+  setTimeout(() => { if (S.arm === key) { S.arm = null; render(); } }, 3000);
+  return false;
+}
+let PIN = '';
+try { PIN = localStorage.getItem('abjad_pin') || ''; } catch(e) {}
+let askedPin = false;
+function askPin() {
+  if (askedPin) return; askedPin = true;
+  const v = prompt('اكتبي كود الدخول:');
+  askedPin = false;
+  if (v) { PIN = v.trim(); try { localStorage.setItem('abjad_pin', PIN); } catch(e) {} poll(); }
+  else setSt('محتاج كود الدخول عشان يتزامن — حدّثي الصفحة', true);
+}
+function api(body) {
+  return fetch('/api/data', {method: body ? 'POST' : 'GET', headers: {'content-type': 'application/json', 'x-pin': PIN}, body: body ? JSON.stringify(body) : undefined})
+    .then(r => { if (r.status === 401) { askPin(); throw {code: 'pin'}; } if (!r.ok) throw {code: r.status}; return r.json(); });
+}
+function save(...parts){
+  try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e) {}
+  (parts.length ? parts : PARTS).forEach(p => {
+    dirty.add(p);
+    chain = chain.then(() => api({part: p, value: db[p]})).then(() => { dirty.delete(p); setSt('متزامن ✓'); })
+      .catch(e => { dirty.delete(p); if (!(e && e.code === 'pin')) setSt('تعذّر الحفظ أونلاين (' + ((e && e.code) || '') + ') — الشغل محفوظ على الجهاز', true); });
+  });
+}
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const studs = g => db.students.filter(s => s.g === g);
+const attKeys = (g, m) => Object.keys(db.att).filter(k => k.startsWith(g + '|') && k.split('|')[1].slice(5,7) === m);
+const absCount = (id, g, m) => attKeys(g, m).filter(k => db.att[k][id] === 'a').length;
+const presCount = (id, g, m) => attKeys(g, m).filter(k => db.att[k][id] === 'p').length;
+const isPaid = (id, m) => db.mp[id + '_' + m] !== undefined;
+const spKeys = (g, m) => Object.keys(db.sp).filter(k => k.startsWith(g + '|') && k.split('|')[1].slice(5,7) === m);
+const paidN = (id, g, m) => spKeys(g, m).filter(k => db.sp[k][id] !== undefined).length;
+const paidSum = (id, g, m) => spKeys(g, m).reduce((a, k) => a + (+db.sp[k][id] || 0), 0);
+const unpaidN = (id, g, m) => attKeys(g, m).filter(k => db.att[k][id] === 'p' && !(db.sp[k] && db.sp[k][id] !== undefined)).length;
+const tasksOf = (g, m) => db.tasks.filter(t => t.g === g && t.m === m);
+
+function dashCard(g, m) {
+  const st = studs(g), ids = st.map(s => s.id), price = db.price[g] || 0, sess = MODE[g] === 's';
+  let p = 0, a = 0;
+  attKeys(g, m).forEach(k => ids.forEach(id => { if (db.att[k][id] === 'p') p++; if (db.att[k][id] === 'a') a++; }));
+  const rate = p + a ? Math.round(p / (p + a) * 100) : 0;
+  const tk = tasksOf(g, m);
+  const tdone = tk.reduce((n, t) => n + ids.filter(id => db.done[t.id + '_' + id]).length, 0);
+  const trate = tk.length && ids.length ? Math.round(tdone / (tk.length * ids.length) * 100) : 0;
+  const risky = st.map(s => ({s, n: absCount(s.id, g, m)})).filter(x => x.n >= 2).sort((x, y) => y.n - x.n);
+  let payStat, collected, oweHtml;
+  if (sess) {
+    collected = ids.reduce((x, id) => x + paidSum(id, g, m), 0);
+    payStat = `<div class="stat"><b>${ids.reduce((x, id) => x + paidN(id, g, m), 0)}</b><small>حصص مدفوعة</small></div>`;
+    const owe = st.map(s => ({s, n: unpaidN(s.id, g, m)})).filter(x => x.n > 0);
+    oweHtml = owe.length ? `<p style="margin-bottom:4px"><b>حصص حضروها ولسه ما دفعوش:</b></p>` + owe.map(x => `<div>${esc(x.s.name)} — ${x.n} حصة${price ? ' (' + x.n * price + ' جنيه)' : ''}</div>`).join('') : '';
+  } else {
+    const paidIds = ids.filter(id => isPaid(id, m));
+    collected = paidIds.reduce((x, id) => x + (+db.mp[id + '_' + m] || 0), 0);
+    payStat = `<div class="stat"><b>${paidIds.length}/${st.length}</b><small>دفعوا الشهر</small></div>`;
+    const owe = st.filter(s => !isPaid(s.id, m));
+    oweHtml = owe.length ? `<p style="margin-bottom:4px"><b>لسه ما دفعوش:</b> ${owe.map(s => esc(s.name)).join('، ')}</p>` : '';
+  }
+  return `<div class="card"><h3>${GN[g]} — ${MN[m]} <small style="font-weight:400">(${sess ? 'دفع بالحصة' : 'دفع بالشهر'})</small></h3>
+    <div class="grid">
+      <div class="stat"><b>${st.length}</b><small>عدد الطلاب</small></div>
+      <div class="stat"><b>${rate}%</b><small>نسبة الحضور (${attKeys(g, m).length} حصة)</small></div>
+      ${payStat}
+      <div class="stat"><b>${collected}</b><small>إجمالي المحصّل (جنيه)</small></div>
+    </div>
+    <p style="margin:12px 0 2px">التاسكات: ${trate}% (${tk.length} تاسك)</p>
+    <div class="bar"><i style="width:${trate}%"></i></div>
+    ${risky.length ? `<p class="warn" style="margin-bottom:4px">غياب متكرر:</p>` + risky.map(x => `<div>${esc(x.s.name)} — ${x.n} غياب</div>`).join('') : ''}
+    ${oweHtml}
+  </div>`;
+}
+
+function viewDash() {
+  return dashCard('1', S.m) + dashCard('2', S.m) + dashCard('3', S.m) +
+    `<div class="card"><h3>نسخة احتياطية</h3>
+      <p style="margin-top:0;font-size:14px">البيانات محفوظة في المتصفح. خدي نسخة احتياطية من وقت لوقت.</p>
+      <div class="tools"><button class="btn" data-click="exp">تنزيل نسخة</button>
+      <label class="btn ghost" style="cursor:pointer">استرجاع نسخة<input type="file" accept=".json" hidden data-change="imp"></label></div></div>`;
+}
+
+function viewStu() {
+  const st = studs(S.g);
+  return `<div class="card"><h3>طلاب ${GN[S.g]}</h3>
+    <div class="add"><input type="text" id="sn" placeholder="اسم الطالب"><input type="tel" id="sp" placeholder="رقم التليفون (اختياري)"><button class="btn" data-click="addStu">إضافة</button></div>
+    ${st.length ? st.map(s => `<div class="row"><div class="nm">${esc(s.name)}<small>${esc(s.phone || '')}</small></div><button class="btn red" data-click="delStu|${s.id}">${S.arm === 's' + s.id ? 'اضغطي تاني للتأكيد' : 'حذف'}</button></div>`).join('') : '<div class="empty">لسه مفيش طلاب. ضيفي أول طالب.</div>'}
+  </div>`;
+}
+
+function viewAtt() {
+  const st = studs(S.g), key = S.g + '|' + S.date, rec = db.att[key] || {};
+  const inMonth = S.date.slice(5,7) === S.m;
+  return `<div class="card"><h3>حضور ${GN[S.g]}</h3>
+    <div class="add"><input type="date" id="ad" value="${S.date}" min="${YEAR}-${S.m}-01" max="${YEAR}-${S.m}-31" data-change="date"></div>
+    ${inMonth ? '' : '<p class="warn">التاريخ ده مش في الشهر المختار.</p>'}
+    ${st.length ? `<div class="tools" style="margin:0 0 8px"><button class="btn gold" data-click="allP">الكل حاضر</button></div>` +
+    st.map(s => `<div class="row"><div class="nm">${esc(s.name)}<small>حضر ${presCount(s.id, S.g, S.m)} — غاب ${absCount(s.id, S.g, S.m)}</small></div>
+      <div class="tg"><button class="p ${rec[s.id] === 'p' ? 'on' : ''}" data-click="setAtt|${s.id}|p">حاضر</button><button class="a ${rec[s.id] === 'a' ? 'on' : ''}" data-click="setAtt|${s.id}|a">غايب</button></div></div>`).join('')
+    : '<div class="empty">ضيفي الطلاب الأول.</div>'}
+  </div>`;
+}
+
+function viewPay() { return MODE[S.g] === 's' ? viewPayS() : viewPayM(); }
+function viewPayS() {
+  const st = studs(S.g), key = S.g + '|' + S.date, rec = db.sp[key] || {}, att = db.att[key] || {};
+  const price = db.price[S.g] || 0;
+  const total = st.reduce((a, s) => a + paidSum(s.id, S.g, S.m), 0);
+  return `<div class="card"><h3>دفع ${GN[S.g]} (بالحصة) — ${MN[S.m]}</h3>
+    <label>سعر الحصة (جنيه)</label>
+    <div class="add"><input type="number" value="${price || ''}" data-change="price" data-g="${S.g}"></div>
+    <label>تاريخ الحصة</label>
+    <div class="add"><input type="date" value="${S.date}" min="${YEAR}-${S.m}-01" max="${YEAR}-${S.m}-31" data-change="date"></div>
+    ${st.length ? `<div class="tools" style="margin:0 0 8px"><button class="btn gold" data-click="paidPresent">الحاضرين دفعوا</button></div>` +
+    st.map(s => { const v = rec[s.id], ok = v !== undefined, tag = att[s.id] === 'p' ? 'حضر' : att[s.id] === 'a' ? 'غاب' : ''; return `<div class="row"><div class="nm">${esc(s.name)}<small>${tag ? tag + ' — ' : ''}دفع ${paidN(s.id, S.g, S.m)} حصة (${paidSum(s.id, S.g, S.m)} جنيه)${unpaidN(s.id, S.g, S.m) ? ' — عليه ' + unpaidN(s.id, S.g, S.m) + ' حصة' : ''}</small></div>
+      <button class="btn ${ok ? 'paid' : 'unpaid'}" data-click="togPayS|${s.id}">${ok ? 'دفع ' + v + ' ✓' : 'تسجيل دفع'}</button></div>`; }).join('')
+    : '<div class="empty">ضيفي الطلاب الأول.</div>'}
+    <p style="margin-bottom:0"><b>إجمالي ${MN[S.m]}: ${total} جنيه</b></p>
+  </div>`;
+}
+function viewPayM() {
+  const st = studs(S.g);
+  const total = st.reduce((a, s) => a + (+db.mp[s.id + '_' + S.m] || 0), 0);
+  return `<div class="card"><h3>دفع ${GN[S.g]} (بالشهر) — ${MN[S.m]}</h3>
+    <label>سعر الشهر (جنيه)</label>
+    <div class="add"><input type="number" value="${db.price[S.g] || ''}" data-change="price" data-g="${S.g}"></div>
+    ${st.length ? st.map(s => { const v = db.mp[s.id + '_' + S.m], ok = v !== undefined; return `<div class="row"><div class="nm">${esc(s.name)}<small>${ok ? 'دفع ' + v + ' جنيه' : 'لسه ما دفعش'}</small></div>
+      <button class="btn ${ok ? 'paid' : 'unpaid'}" data-click="togPay|${s.id}">${ok ? 'دفع ✓' : 'تسجيل دفع'}</button></div>`; }).join('')
+    : '<div class="empty">ضيفي الطلاب الأول.</div>'}
+    <p style="margin-bottom:0"><b>إجمالي ${MN[S.m]}: ${total} جنيه</b></p>
+  </div>`;
+}
+
+function viewTask() {
+  const st = studs(S.g), tk = tasksOf(S.g, S.m);
+  return `<div class="card"><h3>تاسكات ${GN[S.g]} — ${MN[S.m]}</h3>
+    <div class="add"><button class="btn" data-click="addTask">+ تاسك جديد</button></div>
+    ${tk.length ? tk.map(t => { const n = st.filter(s => db.done[t.id + '_' + s.id]).length; return `<details ${S.open === t.id ? 'open' : ''}><summary>${esc(t.title)} (${n}/${st.length})</summary>
+      ${st.map(s => `<div class="row"><div class="nm">${esc(s.name)}</div><button class="btn ${db.done[t.id + '_' + s.id] ? 'paid' : 'unpaid'}" data-click="togDoneB|${t.id}|${s.id}">${db.done[t.id + '_' + s.id] ? 'عمله ✓' : 'لسه'}</button></div>`).join('') || '<div class="empty">مفيش طلاب.</div>'}
+      <div class="tools" style="margin:8px 0"><button class="btn red" data-click="delTask|${t.id}">${S.arm === 't' + t.id ? 'اضغطي تاني للتأكيد' : 'حذف التاسك'}</button></div></details>`; }).join('')
+    : '<div class="empty">مفيش تاسكات للشهر ده.</div>'}
+  </div>`;
+}
+
+function render() {
+  try { renderInner(); }
+  catch (err) { document.getElementById('app').innerHTML = '<div class="card warn">خطأ في العرض: ' + esc(err.message) + '</div>'; }
+}
+function renderInner() {
+  document.querySelectorAll('[data-g]').forEach(b => b.classList.toggle('on', b.dataset.g === S.g));
+  document.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === S.m));
+  document.querySelectorAll('[data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === S.t));
+  const v = {dash: viewDash, stu: viewStu, att: viewAtt, pay: viewPay, task: viewTask}[S.t];
+  document.getElementById('app').innerHTML = v();
+}
+
+function addStu() {
+  const n = document.getElementById('sn').value.trim();
+  if (!n) return;
+  db.students.push({id: uid(), name: n, phone: document.getElementById('sp').value.trim(), g: S.g});
+  save('students'); render();
+}
+function delStu(id) {
+  if (!sure('s' + id)) return;
+  db.students = db.students.filter(s => s.id !== id);
+  Object.keys(db.att).forEach(k => delete db.att[k][id]);
+  Object.keys(db.mp).forEach(k => { if (k.startsWith(id + '_')) delete db.mp[k]; });
+  Object.keys(db.sp).forEach(k => { delete db.sp[k][id]; });
+  Object.keys(db.done).forEach(k => { if (k.endsWith('_' + id)) delete db.done[k]; });
+  save('students','att','sp','mp','done'); render();
+}
+function setAtt(id, v) {
+  const k = S.g + '|' + S.date;
+  db.att[k] = db.att[k] || {};
+  if (db.att[k][id] === v) delete db.att[k][id]; else db.att[k][id] = v;
+  save('att'); render();
+}
+function allP() {
+  const k = S.g + '|' + S.date;
+  db.att[k] = db.att[k] || {};
+  studs(S.g).forEach(s => db.att[k][s.id] = 'p');
+  save('att'); render();
+}
+function togPay(id) {
+  const k = id + '_' + S.m;
+  if (db.mp[k] !== undefined) { delete db.mp[k]; }
+  else {
+    let a = db.price[S.g] || 0;
+    if (!a) { setSt('اكتبي السعر في خانة السعر الأول', true); return; }
+    db.mp[k] = +a || 0;
+  }
+  save('mp'); render();
+}
+function togPayS(id) {
+  const k = S.g + '|' + S.date;
+  db.sp[k] = db.sp[k] || {};
+  if (db.sp[k][id] !== undefined) { delete db.sp[k][id]; }
+  else {
+    let a = db.price[S.g] || 0;
+    if (!a) { setSt('اكتبي السعر في خانة السعر الأول', true); return; }
+    db.sp[k][id] = +a || 0;
+  }
+  save('sp'); render();
+}
+function paidPresent() {
+  const k = S.g + '|' + S.date, att = db.att[k] || {};
+  db.sp[k] = db.sp[k] || {};
+  studs(S.g).forEach(s => { if (att[s.id] === 'p' && db.sp[k][s.id] === undefined) db.sp[k][s.id] = db.price[S.g] || 0; });
+  save('sp'); render();
+}
+function togDoneB(t, s) { S.open = t; togDone(t, s, !db.done[t + '_' + s]); }
+function addTask() {
+  const t = 'تاسك ' + (tasksOf(S.g, S.m).length + 1), nid = uid();
+  S.open = nid;
+  db.tasks.push({id: nid, title: t, g: S.g, m: S.m});
+  save('tasks'); render();
+}
+function delTask(id) {
+  if (!sure('t' + id)) return;
+  db.tasks = db.tasks.filter(t => t.id !== id);
+  Object.keys(db.done).forEach(k => { if (k.startsWith(id + '_')) delete db.done[k]; });
+  save('tasks','done'); render();
+}
+function togDone(t, s, v) { if (v) db.done[t + '_' + s] = 1; else delete db.done[t + '_' + s]; save('done'); render(); }
+
+function exp() {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(db)], {type: 'application/json'}));
+  a.download = 'abjad-code-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+}
+function imp(inp) {
+  const f = inp.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => { try { db = Object.assign({students:[],att:{},sp:{},mp:{},tasks:[],done:{},price:{'1':0,'2':0,'3':0}}, JSON.parse(r.result)); save(); render(); setSt('تم الاسترجاع'); } catch(e) { setSt('الملف غير صالح', true); } };
+  r.readAsText(f);
+}
+
+document.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { S.g = b.dataset.g; render(); });
+document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { S.m = b.dataset.m; S.date = YEAR + '-' + S.m + '-01'; render(); });
+document.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { S.t = b.dataset.t; render(); });
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-click]'); if (!el) return;
+  const [fn, ...a] = el.dataset.click.split('|');
+  if (typeof window[fn] === 'function') window[fn](...a);
+});
+document.addEventListener('change', e => {
+  const el = e.target, c = el.dataset && el.dataset.change; if (!c) return;
+  if (c === 'price') { db.price[el.dataset.g] = +el.value; save('price'); }
+  else if (c === 'date') { S.date = el.value; render(); }
+  else if (c === 'done') togDone(el.dataset.t, el.dataset.s, el.checked);
+  else if (c === 'imp') imp(el);
+});
+render();
+
+let first = true;
+async function poll() {
+  try {
+    const r = await api();
+    const before = JSON.stringify(db);
+    let anyServer = false;
+    PARTS.forEach(p => {
+      const v = r.data[p];
+      if (v === null || v === undefined) return;
+      const isArr = p === 'students' || p === 'tasks';
+      if (!(isArr ? Array.isArray(v) : (typeof v === 'object' && !Array.isArray(v)))) return;
+      anyServer = true;
+      if (!dirty.has(p)) db[p] = v;
+    });
+    if (first) { first = false; if (!anyServer && db.students.length) save(); }
+    setSt('متزامن ✓');
+    if (JSON.stringify(db) === before) return;
+    const a = document.activeElement;
+    if (a && a.tagName === 'INPUT' && a.type !== 'checkbox' && a.value) return;
+    render();
+  } catch (e) { if (!(e && e.code === 'pin')) setSt('مفيش اتصال — الشغل محفوظ على الجهاز', true); }
+}
+poll();
+setInterval(() => { if (!document.hidden) poll(); }, 20000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
+</script>
+</body>
+</html>
